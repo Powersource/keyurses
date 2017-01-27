@@ -13,17 +13,31 @@ fn main() {
     siv.add_global_callback('q', |s| s.quit());
 
     let words = Words::new();
-    
+
 
     siv.add_layer(Dialog::around(LinearLayout::vertical()
-                .child(TextView::new("testtext").with_id("word_field"))
-                .child(EditView::new().on_edit(move |s, _, _| {
-                    s.find_id::<TextView>("word_field").unwrap().set_content(words.rand_word())
-                })))
-            .title("Keyurses")
-            .button("Quit", |s| s.quit()));
+            .child(TextView::new("testtext").with_id("target_field"))
+            .child(EditView::new()
+                .on_edit(move |s, input, _| typed_some(s, input, &words))
+                .with_id("input_field")))
+        .title("Keyurses")
+        .button("Quit", |s| s.quit()));
 
     siv.run();
+}
+
+fn typed_some(siv: &mut Cursive, input: &str, words: &Words) {
+    let mut reset_input = false;
+    {
+        let target_word = siv.find_id::<TextView>("target_field").unwrap();
+        if target_word.get_content() == input {
+            target_word.set_content(words.rand_word());
+            reset_input = true;
+        }
+    }
+    if reset_input {
+        siv.find_id::<EditView>("input_field").unwrap().set_content("");
+    }
 }
 
 #[derive(Debug)]
