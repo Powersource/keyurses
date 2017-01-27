@@ -4,6 +4,7 @@ extern crate rand;
 use cursive::Cursive;
 use cursive::views::{Dialog, TextView, EditView, LinearLayout};
 use cursive::traits::Identifiable;
+use cursive::view::Finder;
 use rand::Rng;
 
 fn main() {
@@ -13,7 +14,6 @@ fn main() {
     siv.add_global_callback('q', |s| s.quit());
 
     let words = Words::new();
-
 
     siv.add_layer(Dialog::around(LinearLayout::vertical()
             .child(TextView::new("testtext").with_id("target_field"))
@@ -27,17 +27,57 @@ fn main() {
 }
 
 fn typed_some(siv: &mut Cursive, input: &str, words: &Words) {
+    // See https://github.com/gyscos/Cursive/issues/102
+    // for discussion on this mess
+
+    // This one would be optimal but pisses off the borrow checker about siv
+    /*let target_word = siv.find_id::<TextView>("target_field").unwrap();
+    let input_word = siv.find_id::<EditView>("input_field").unwrap();
+    if target_word.get_content() == input {
+        target_word.set_content(words.rand_word());
+        input_word.set_content("");
+    }*/
+    
+    // This one doesn't crash but is ugly
     let mut reset_input = false;
     {
-        let target_word = siv.find_id::<TextView>("target_field").unwrap();
-        if target_word.get_content() == input {
-            target_word.set_content(words.rand_word());
-            reset_input = true;
-        }
+       let target_word = siv.find_id::<TextView>("target_field").unwrap();
+       if target_word.get_content() == input {
+           target_word.set_content(words.rand_word());
+           reset_input = true;
+       }
     }
     if reset_input {
-        siv.find_id::<EditView>("input_field").unwrap().set_content("");
+       siv.find_id::<EditView>("input_field").unwrap().set_content("");
     }
+
+    // This one crashes due to the last find_id not finding anything. Why?
+    // Does it only look for children?
+    /*let target_word = siv.find_id::<TextView>("target_field").unwrap();
+    if target_word.get_content() == input {
+        target_word.set_content(words.rand_word());
+        target_word.find_id::<EditView>("input_field")
+            .unwrap()
+            .set_content("");
+    }*/
+
+    // This one works but is verbose
+    /*if siv.find_id::<TextView>("target_field").unwrap().get_content() == input {
+        siv.find_id::<TextView>("target_field").unwrap().set_content(words.rand_word());
+        siv.find_id::<EditView>("input_field")
+            .unwrap()
+            .set_content("");
+    }*/
+
+    // This one feels reasonable but TextView doesn't implement content() (EditView does.
+    // Intentional?)
+    /*let target_word = siv.find_id::<TextView>("target_field").unwrap();
+    if target_word.get_content() == input {
+        target_word.content(words.rand_word())
+            .find_id::<EditView>("input_field")
+            .unwrap()
+            .set_content("");
+    }*/
 }
 
 #[derive(Debug)]
