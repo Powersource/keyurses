@@ -30,15 +30,6 @@ fn typed_some(siv: &mut Cursive, input: &str, words: &Words) {
     // See https://github.com/gyscos/Cursive/issues/102
     // for discussion on this mess
 
-    // This one would be optimal but pisses off the borrow checker about siv
-    /*let target_word = siv.find_id::<TextView>("target_field").unwrap();
-    let input_word = siv.find_id::<EditView>("input_field").unwrap();
-    if target_word.get_content() == input {
-        target_word.set_content(words.rand_word());
-        input_word.set_content("");
-    }*/
-    
-    // This one doesn't crash but is ugly
     let mut reset_input = false;
     {
        let target_word = siv.find_id::<TextView>("target_field").unwrap();
@@ -50,34 +41,6 @@ fn typed_some(siv: &mut Cursive, input: &str, words: &Words) {
     if reset_input {
        siv.find_id::<EditView>("input_field").unwrap().set_content("");
     }
-
-    // This one crashes due to the last find_id not finding anything. Why?
-    // Does it only look for children?
-    /*let target_word = siv.find_id::<TextView>("target_field").unwrap();
-    if target_word.get_content() == input {
-        target_word.set_content(words.rand_word());
-        target_word.find_id::<EditView>("input_field")
-            .unwrap()
-            .set_content("");
-    }*/
-
-    // This one works but is verbose
-    /*if siv.find_id::<TextView>("target_field").unwrap().get_content() == input {
-        siv.find_id::<TextView>("target_field").unwrap().set_content(words.rand_word());
-        siv.find_id::<EditView>("input_field")
-            .unwrap()
-            .set_content("");
-    }*/
-
-    // This one feels reasonable but TextView doesn't implement content() (EditView does.
-    // Intentional?)
-    /*let target_word = siv.find_id::<TextView>("target_field").unwrap();
-    if target_word.get_content() == input {
-        target_word.content(words.rand_word())
-            .find_id::<EditView>("input_field")
-            .unwrap()
-            .set_content("");
-    }*/
 }
 
 #[derive(Debug)]
