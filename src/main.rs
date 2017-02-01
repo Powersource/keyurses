@@ -12,7 +12,7 @@ fn main() {
     let mut siv = Cursive::new();
     siv.add_global_callback('q', |s| s.quit());
 
-    let words = Words::new();
+    let words = WordBar::new();
 
     siv.add_layer(Dialog::around(LinearLayout::vertical()
             .child(TextView::new(words.rand_word()).with_id("target_field"))
@@ -25,7 +25,7 @@ fn main() {
     siv.run();
 }
 
-fn typed_some(siv: &mut Cursive, input: &str, words: &Words) {
+fn typed_some(siv: &mut Cursive, input: &str, words: &WordBar) {
     // See https://github.com/gyscos/Cursive/issues/102
     // for discussion on this mess
 
@@ -42,18 +42,23 @@ fn typed_some(siv: &mut Cursive, input: &str, words: &Words) {
     }
 }
 
+type WordList = Vec<&'static str>;
+
 #[derive(Debug)]
-struct Words {
-    list: Vec<&'static str>,
+struct WordBar {
+    words: WordList,
+    target_list: WordList,
 }
 
-impl Words {
+impl WordBar {
     fn new() -> Self {
-        Words { list: include_str!("google-10000-english-usa.txt").lines().collect() }
+        WordBar { 
+            words: include_str!("google-10000-english-usa.txt").lines().collect(),
+            target_list: vec!("foo") }
     }
 
     fn rand_word(&self) -> &str {
         let mut rng = rand::thread_rng();
-        rng.choose(&self.list).unwrap()
+        rng.choose(&self.words).unwrap()
     }
 }
