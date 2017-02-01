@@ -31,14 +31,14 @@ fn typed_some(siv: &mut Cursive, input: &str, mut words: WordBar) {
 
     let mut reset_input = false;
     {
-       let target_word = siv.find_id::<TextView>("target_field").unwrap();
-       if target_word.get_content() == input {
-           target_word.set_content(words.update_and_get_bar());
-           reset_input = true;
-       }
+        let target_word = siv.find_id::<TextView>("target_field").unwrap();
+        if target_word.get_content() == input {
+            target_word.set_content(words.update_and_get_bar());
+            reset_input = true;
+        }
     }
     if reset_input {
-       siv.find_id::<EditView>("input_field").unwrap().set_content("");
+        siv.find_id::<EditView>("input_field").unwrap().set_content("");
     }
 }
 
@@ -52,9 +52,10 @@ struct WordBar {
 
 impl WordBar {
     fn new() -> Self {
-        WordBar { 
+        WordBar {
             words: include_str!("google-10000-english-usa.txt").lines().collect(),
-            target_list: vec!["foo"] }
+            target_list: vec!["foo"],
+        }
     }
 
     fn rand_word(&self) -> &'static str {
