@@ -4,7 +4,6 @@ extern crate rand;
 use cursive::Cursive;
 use cursive::views::{Dialog, TextView, EditView, LinearLayout};
 use cursive::traits::Identifiable;
-use cursive::view::Finder;
 use rand::Rng;
 
 fn main() {
@@ -16,7 +15,7 @@ fn main() {
     let words = Words::new();
 
     siv.add_layer(Dialog::around(LinearLayout::vertical()
-            .child(TextView::new("testtext").with_id("target_field"))
+            .child(TextView::new(words.rand_word()).with_id("target_field"))
             .child(EditView::new()
                 .on_edit(move |s, input, _| typed_some(s, input, &words))
                 .with_id("input_field")))
