@@ -5,6 +5,7 @@ use cursive::Cursive;
 use cursive::views::{Dialog, TextView, EditView, LinearLayout};
 use cursive::traits::Identifiable;
 use rand::Rng;
+use std::cell::RefCell;
 
 fn main() {
     // This really messes with stdout. Seems to disable it by default but when
@@ -12,12 +13,14 @@ fn main() {
     let mut siv = Cursive::new();
     siv.add_global_callback('q', |s| s.quit());
 
-    let mut words = WordBar::new();
-
+    // Reason for using RefCell
+    // https://stackoverflow.com/questions/41990175/problems-with-mutability-in-a-closure
+    let words = RefCell::new(WordBar::new());
+    let start_bar = words.borrow_mut().update_and_get_bar();
     siv.add_layer(Dialog::around(LinearLayout::vertical()
-            .child(TextView::new(words.update_and_get_bar()).with_id("target_field"))
+            .child(TextView::new(start_bar).with_id("target_field"))
             .child(EditView::new()
-                .on_edit(move |s, input, _| words.typed_some(s, input))
+                .on_edit(move |s, input, _| words.borrow_mut().typed_some(s, input))
                 .with_id("input_field")))
         .title("Keyurses")
         .button("Quit", |s| s.quit()));
@@ -38,7 +41,7 @@ impl WordBar {
     fn new() -> Self {
         WordBar {
             words: include_str!("google-10000-english-usa.txt").lines().collect(),
-            target_list: vec!["foo"],
+            target_list: vec![],
         }
     }
 
@@ -66,7 +69,7 @@ impl WordBar {
 
     fn update_and_get_bar(&mut self) -> String {
         if self.target_list.len() > 0 {
-            self.target_list.pop();
+            self.target_list.remove(0);
         }
         while self.target_list.len() < 5 {
             let new_word = self.rand_word();
