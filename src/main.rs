@@ -21,7 +21,7 @@ fn main() {
             .child(TextView::new(start_bar).with_id("target_field"))
             .child(EditView::new()
                 .on_edit(move |s, input, _| words.borrow_mut().typed_some(s, input))
-                .with_id("input_field")))
+                .with_id_mut("input_field")))
         .title("Keyurses")
         .button("Quit", |s| s.quit()));
 
@@ -61,9 +61,11 @@ impl WordBar {
         //     siv.find_id::<EditView>("input_field").unwrap().set_content("");
         // }
 
+        let mut input_word = siv.find_id_mut::<EditView>("input_field").unwrap();
         siv.find_id("target_field", |target: &mut TextView| {
             if target.get_content() == input {
                 target.set_content(self.update_and_get_bar());
+                input_word.set_content("");
             }
         });
     }
