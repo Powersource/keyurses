@@ -49,17 +49,23 @@ impl WordBar {
         // See https://github.com/gyscos/Cursive/issues/102
         // for discussion on this mess
 
-        let mut reset_input = false;
-        {
-            let target_word = siv.find_id::<TextView>("target_field").unwrap();
-            if target_word.get_content() == input {
-                target_word.set_content(self.update_and_get_bar());
-                reset_input = true;
+        // let mut reset_input = false;
+        // {
+        //     let target_word = siv.find_id::<TextView>("target_field").unwrap();
+        //     if target_word.get_content() == input {
+        //         target_word.set_content(self.update_and_get_bar());
+        //         reset_input = true;
+        //     }
+        // }
+        // if reset_input {
+        //     siv.find_id::<EditView>("input_field").unwrap().set_content("");
+        // }
+
+        siv.find_id("target_field", |target: &mut TextView| {
+            if target.get_content() == input {
+                target.set_content(self.update_and_get_bar());
             }
-        }
-        if reset_input {
-            siv.find_id::<EditView>("input_field").unwrap().set_content("");
-        }
+        });
     }
 
     fn rand_word(&self) -> &'static str {
